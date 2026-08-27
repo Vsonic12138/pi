@@ -1,0 +1,26 @@
+name: Sync upstream
+
+on:
+  schedule:
+    # Every 6 hours (UTC). Mirrors earendil-works/pi main onto the upstream branch.
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out fork
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+
+      - name: Fast-forward upstream branch
+        run: |
+          git remote add upstream https://github.com/earendil-works/pi.git
+          git fetch upstream main
+          git push origin upstream/main:refs/heads/upstream --force-with-lease
